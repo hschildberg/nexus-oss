@@ -169,7 +169,7 @@ public class EventExporterImpl
       Iterable<PartitionInfoSnapshot> partitions = journal.getAllPartitions();
       for (PartitionInfo partition : partitions) {
         if (!partition.isClosed()) {
-          // skip new open partitions, this is new data _after_ the export was requested
+          // skip open partitions, this is new data _after_ the export was requested
           break;
         }
         partitionCount++;
