@@ -14,30 +14,28 @@
 package org.sonatype.nexus.plugins.events;
 
 import org.sonatype.nexus.events.AbstractEvent;
-import org.sonatype.nexus.plugins.NexusPluginManager;
-import org.sonatype.nexus.plugins.PluginDescriptor;
 
 /**
  * This event is triggered when a Nexus plugin is successfully activated.
  */
 @Deprecated
 public final class PluginActivatedEvent
-    extends AbstractEvent<NexusPluginManager>
+    extends AbstractEvent<Object>
 {
   // ----------------------------------------------------------------------
   // Implementation fields
   // ----------------------------------------------------------------------
 
-  private final PluginDescriptor descriptor;
+  private final String pluginId;
 
   // ----------------------------------------------------------------------
   // Constructors
   // ----------------------------------------------------------------------
 
-  public PluginActivatedEvent(final NexusPluginManager component, final PluginDescriptor descriptor) {
-    super(component);
+  public PluginActivatedEvent(final Object sender, final String pluginId) {
+    super(sender);
 
-    this.descriptor = descriptor;
+    this.pluginId = pluginId;
   }
 
   // ----------------------------------------------------------------------
@@ -46,8 +44,6 @@ public final class PluginActivatedEvent
 
   @Override
   public String toString() {
-    return getClass().getSimpleName() + "{" +
-        "gav=" + descriptor.getPluginCoordinates() +
-        '}';
+    return getClass().getSimpleName() + "{" + "id=" + pluginId + '}';
   }
 }

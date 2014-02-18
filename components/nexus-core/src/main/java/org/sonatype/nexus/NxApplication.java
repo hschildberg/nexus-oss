@@ -26,8 +26,6 @@ import org.sonatype.configuration.ConfigurationException;
 import org.sonatype.nexus.configuration.ConfigurationChangeEvent;
 import org.sonatype.nexus.configuration.application.NexusConfiguration;
 import org.sonatype.nexus.events.EventSubscriberHost;
-import org.sonatype.nexus.plugins.NexusPluginManager;
-import org.sonatype.nexus.plugins.PluginManagerResponse;
 import org.sonatype.nexus.proxy.events.NexusInitializedEvent;
 import org.sonatype.nexus.proxy.events.NexusStartedEvent;
 import org.sonatype.nexus.proxy.events.NexusStoppedEvent;
@@ -61,8 +59,6 @@ public class NxApplication
 
   private final NexusConfiguration nexusConfiguration;
 
-  private final NexusPluginManager nexusPluginManager;
-
   private final SecuritySystem securitySystem;
 
   private final NexusScheduler nexusScheduler;
@@ -73,14 +69,13 @@ public class NxApplication
 
   @Inject
   public NxApplication(final EventBus eventBus, final NexusConfiguration nexusConfiguration,
-      final NexusPluginManager nexusPluginManager, final ApplicationStatusSource applicationStatusSource,
+      final ApplicationStatusSource applicationStatusSource,
       final SecuritySystem securitySystem, final NexusScheduler nexusScheduler,
       final RepositoryRegistry repositoryRegistry, final EventSubscriberHost eventSubscriberHost)
   {
     this.eventBus = checkNotNull(eventBus);
     this.applicationStatusSource = checkNotNull(applicationStatusSource);
     this.nexusConfiguration = checkNotNull(nexusConfiguration);
-    this.nexusPluginManager = checkNotNull(nexusPluginManager);
     this.securitySystem = checkNotNull(securitySystem);
     this.nexusScheduler = checkNotNull(nexusScheduler);
     this.repositoryRegistry = checkNotNull(repositoryRegistry);
@@ -88,16 +83,7 @@ public class NxApplication
 
     logInitialized();
 
-    log.info("Activating locally installed plugins...");
-    final Collection<PluginManagerResponse> activationResponse = this.nexusPluginManager.activateInstalledPlugins();
-    for (PluginManagerResponse response : activationResponse) {
-      if (response.isSuccessful()) {
-        log.info(response.formatAsString(log.isDebugEnabled()));
-      }
-      else {
-        log.warn(response.formatAsString(log.isDebugEnabled()));
-      }
-    }
+    log.info("Activating locally installed plugins..."); // FIXME:NGPLUGIN
 
     // register core and plugin contributed subscribers, start dispatching events to them
     eventSubscriberHost.startup();

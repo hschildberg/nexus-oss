@@ -14,21 +14,15 @@
 package org.sonatype.nexus.plugins.plugin.console;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.sonatype.nexus.plugin.support.DocumentationBundle;
-import org.sonatype.nexus.plugins.NexusPluginManager;
-import org.sonatype.nexus.plugins.PluginResponse;
-import org.sonatype.nexus.plugins.plugin.console.model.DocumentationLink;
 import org.sonatype.nexus.plugins.plugin.console.model.PluginInfo;
 import org.sonatype.nexus.web.WebResourceBundle;
-import org.sonatype.plugin.metadata.GAVCoordinate;
 import org.sonatype.sisu.goodies.common.ComponentSupport;
 
 import com.google.common.collect.LinkedHashMultimap;
@@ -45,17 +39,13 @@ public class DefaultPluginConsoleManager
     extends ComponentSupport
     implements PluginConsoleManager
 {
-  private final NexusPluginManager pluginManager;
-
   private final List<WebResourceBundle> resourceBundles;
 
   private final Multimap<String, DocumentationBundle> docBundles;
 
   @Inject
-  public DefaultPluginConsoleManager(final NexusPluginManager pluginManager,
-                                     final List<WebResourceBundle> resourceBundles)
+  public DefaultPluginConsoleManager(final List<WebResourceBundle> resourceBundles)
   {
-    this.pluginManager = checkNotNull(pluginManager);
     this.resourceBundles = checkNotNull(resourceBundles);
 
     this.docBundles = LinkedHashMultimap.create();
@@ -69,51 +59,51 @@ public class DefaultPluginConsoleManager
   }
 
   public List<PluginInfo> listPluginInfo() {
-    List<PluginInfo> result = new ArrayList<PluginInfo>();
+    List<PluginInfo> result = new ArrayList<PluginInfo>(); // FIXME:NGPLUGIN
 
-    Map<GAVCoordinate, PluginResponse> pluginResponses = pluginManager.getPluginResponses();
-
-    for (PluginResponse pluginResponse : pluginResponses.values()) {
-      result.add(buildPluginInfo(pluginResponse));
-    }
-
-    return result;
-  }
-
-  private PluginInfo buildPluginInfo(PluginResponse pluginResponse) {
-    PluginInfo result = new PluginInfo();
-
-    result.setStatus(pluginResponse.getAchievedGoal().name());
-    result.setVersion(pluginResponse.getPluginCoordinates().getVersion());
-    if (pluginResponse.getPluginDescriptor() != null) {
-      result.setName(pluginResponse.getPluginDescriptor().getPluginMetadata().getName());
-      result.setDescription(pluginResponse.getPluginDescriptor().getPluginMetadata().getDescription());
-      result.setScmVersion(pluginResponse.getPluginDescriptor().getPluginMetadata().getScmVersion());
-      result.setScmTimestamp(pluginResponse.getPluginDescriptor().getPluginMetadata().getScmTimestamp());
-      result.setSite(pluginResponse.getPluginDescriptor().getPluginMetadata().getPluginSite());
-    }
-    else {
-      result.setName(pluginResponse.getPluginCoordinates().getGroupId() + ":"
-          + pluginResponse.getPluginCoordinates().getArtifactId());
-    }
-
-    Collection<DocumentationBundle> docs =
-        docBundles.get(pluginResponse.getPluginCoordinates().getArtifactId());
-    if (docs != null && !docs.isEmpty()) {
-      for (DocumentationBundle bundle : docs) {
-        // here, we (mis)use the documentation field, to store path segments only, the REST resource will create
-        // proper URLs out this these.
-        DocumentationLink link = new DocumentationLink();
-        link.setLabel(bundle.getDescription());
-        link.setUrl(bundle.getPluginId() + "/" + bundle.getPathPrefix());
-        result.addDocumentation(link);
-      }
-    }
-
-    if (!pluginResponse.isSuccessful()) {
-      result.setFailureReason(pluginResponse.formatAsString(false));
-    }
+//    Map<GAVCoordinate, PluginResponse> pluginResponses = pluginManager.getPluginResponses();
+//
+//    for (PluginResponse pluginResponse : pluginResponses.values()) {
+//      result.add(buildPluginInfo(pluginResponse));
+//    }
 
     return result;
   }
+
+//  private PluginInfo buildPluginInfo(PluginResponse pluginResponse) {
+//    PluginInfo result = new PluginInfo();
+//
+//    result.setStatus(pluginResponse.getAchievedGoal().name());
+//    result.setVersion(pluginResponse.getPluginCoordinates().getVersion());
+//    if (pluginResponse.getPluginDescriptor() != null) {
+//      result.setName(pluginResponse.getPluginDescriptor().getPluginMetadata().getName());
+//      result.setDescription(pluginResponse.getPluginDescriptor().getPluginMetadata().getDescription());
+//      result.setScmVersion(pluginResponse.getPluginDescriptor().getPluginMetadata().getScmVersion());
+//      result.setScmTimestamp(pluginResponse.getPluginDescriptor().getPluginMetadata().getScmTimestamp());
+//      result.setSite(pluginResponse.getPluginDescriptor().getPluginMetadata().getPluginSite());
+//    }
+//    else {
+//      result.setName(pluginResponse.getPluginCoordinates().getGroupId() + ":"
+//          + pluginResponse.getPluginCoordinates().getArtifactId());
+//    }
+//
+//    Collection<DocumentationBundle> docs =
+//        docBundles.get(pluginResponse.getPluginCoordinates().getArtifactId());
+//    if (docs != null && !docs.isEmpty()) {
+//      for (DocumentationBundle bundle : docs) {
+//        // here, we (mis)use the documentation field, to store path segments only, the REST resource will create
+//        // proper URLs out this these.
+//        DocumentationLink link = new DocumentationLink();
+//        link.setLabel(bundle.getDescription());
+//        link.setUrl(bundle.getPluginId() + "/" + bundle.getPathPrefix());
+//        result.addDocumentation(link);
+//      }
+//    }
+//
+//    if (!pluginResponse.isSuccessful()) {
+//      result.setFailureReason(pluginResponse.formatAsString(false));
+//    }
+//
+//    return result;
+//  }
 }

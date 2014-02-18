@@ -21,7 +21,6 @@ import java.nio.file.FileSystems
 import org.sonatype.nexus.ApplicationStatusSource
 import org.sonatype.nexus.atlas.SystemInformationGenerator
 import org.sonatype.nexus.configuration.application.ApplicationConfiguration
-import org.sonatype.nexus.plugins.NexusPluginManager
 import org.sonatype.sisu.goodies.common.ComponentSupport
 import org.sonatype.sisu.goodies.common.Iso8601Date
 
@@ -50,20 +49,16 @@ class SystemInformationGeneratorImpl
 
   private final Map<String, String> parameters;
 
-  private final NexusPluginManager pluginManager
-
   @Inject
   SystemInformationGeneratorImpl(final BeanLocator beanLocator,
                                  final ApplicationConfiguration applicationConfiguration,
                                  final ApplicationStatusSource applicationStatusSource,
-                                 final @Parameters Map<String, String> parameters,
-                                 final NexusPluginManager pluginManager)
+                                 final @Parameters Map<String, String> parameters)
   {
     this.beanLocator = checkNotNull(beanLocator)
     this.applicationConfiguration = checkNotNull(applicationConfiguration)
     this.applicationStatusSource = checkNotNull(applicationStatusSource)
     this.parameters = checkNotNull(parameters);
-    this.pluginManager = checkNotNull(pluginManager)
   }
 
   @Override
@@ -223,28 +218,28 @@ class SystemInformationGeneratorImpl
       ]
     }
 
-    def reportNexusPlugins = {
-      def data = [:]
-      pluginManager.pluginResponses.each { gav, response ->
-        def item = data[gav.artifactId] = [
-            'groupId': gav.groupId,
-            'artifactId': gav.artifactId,
-            'version': gav.version,
-            'successful': response.successful
-        ]
-
-        // include dependency plugins
-        if (!response.pluginDescriptor.importedPlugins.empty) {
-          item.importedPlugins = response.pluginDescriptor.importedPlugins.collect { it.toString() }.join(',')
-        }
-
-        // include error
-        if (response.throwable) {
-          item.throwable = response.throwable.toString()
-        }
-      }
-      return data
-    }
+//    def reportNexusPlugins = {
+//      def data = [:]
+//      pluginManager.pluginResponses.each { gav, response ->
+//        def item = data[gav.artifactId] = [
+//            'groupId': gav.groupId,
+//            'artifactId': gav.artifactId,
+//            'version': gav.version,
+//            'successful': response.successful
+//        ]
+//
+//        // include dependency plugins
+//        if (!response.pluginDescriptor.importedPlugins.empty) {
+//          item.importedPlugins = response.pluginDescriptor.importedPlugins.collect { it.toString() }.join(',')
+//        }
+//
+//        // include error
+//        if (response.throwable) {
+//          item.throwable = response.throwable.toString()
+//        }
+//      }
+//      return data
+//    }
 
     def sections = [
         'system-time': reportTime(),
@@ -256,8 +251,8 @@ class SystemInformationGeneratorImpl
         'nexus-status': reportNexusStatus(),
         'nexus-license': reportNexusLicense(),
         'nexus-properties': parameters.sort(),
-        'nexus-configuration': reportNexusConfiguration(),
-        'nexus-plugins': reportNexusPlugins()
+        'nexus-configuration': reportNexusConfiguration()
+//        'nexus-plugins': reportNexusPlugins() // FIXME:NGPLUGIN
     ]
 
     return sections

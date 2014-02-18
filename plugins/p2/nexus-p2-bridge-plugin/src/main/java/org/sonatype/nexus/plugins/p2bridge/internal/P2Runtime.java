@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.jar.Manifest;
 
 import javax.inject.Inject;
@@ -32,12 +31,8 @@ import org.sonatype.eclipse.bridge.EclipseInstance;
 import org.sonatype.eclipse.bridge.EclipseLocation;
 import org.sonatype.eclipse.bridge.EclipseLocationFactory;
 import org.sonatype.nexus.configuration.application.ApplicationConfiguration;
-import org.sonatype.nexus.plugins.repository.NexusPluginRepository;
-import org.sonatype.nexus.plugins.repository.NoSuchPluginRepositoryArtifactException;
-import org.sonatype.nexus.plugins.repository.PluginRepositoryArtifact;
 import org.sonatype.nexus.util.SystemPropertiesHelper;
 import org.sonatype.nexus.util.file.DirSupport;
-import org.sonatype.plugin.metadata.GAVCoordinate;
 
 import com.google.common.base.Strings;
 import org.codehaus.plexus.archiver.UnArchiver;
@@ -61,21 +56,17 @@ class P2Runtime
 
   private final EclipseBridge eclipseBridge;
 
-  private final NexusPluginRepository pluginRepositoryManager;
-
   private final ApplicationConfiguration applicationConfiguration;
 
   private final UnArchiver unArchiver;
 
   @Inject
   public P2Runtime(final EclipseBridge eclipseBridge, final EclipseLocationFactory eclipseLocationFactory,
-                   final NexusPluginRepository pluginRepositoryManager,
                    final ApplicationConfiguration applicationConfiguration,
                    final @Named("zip") UnArchiver unArchiver)
   {
     this.eclipseBridge = eclipseBridge;
     this.eclipseLocationFactory = eclipseLocationFactory;
-    this.pluginRepositoryManager = pluginRepositoryManager;
     this.applicationConfiguration = applicationConfiguration;
     this.unArchiver = unArchiver;
   }
@@ -211,35 +202,35 @@ class P2Runtime
   }
 
   private File getP2BridgePluginDir() {
-    try {
-      final GAVCoordinate pluginGav = getP2BridgePluginGAV();
-      final PluginRepositoryArtifact pluginArtifact = pluginRepositoryManager.resolveArtifact(pluginGav);
-      return pluginArtifact.getFile().getParentFile();
-    }
-    catch (final NoSuchPluginRepositoryArtifactException e) {
-      throw new IllegalStateException("Could not locate nexus-p2-bridge-plugin", e);
-    }
+//    try {
+//      final GAVCoordinate pluginGav = getP2BridgePluginGAV();
+//      final PluginRepositoryArtifact pluginArtifact = pluginRepositoryManager.resolveArtifact(pluginGav);
+//      return pluginArtifact.getFile().getParentFile();
+//    }
+//    catch (final NoSuchPluginRepositoryArtifactException e) {
+      throw new IllegalStateException("Could not locate nexus-p2-bridge-plugin"); // FIXME:NGPLUGIN
+//    }
   }
 
-  private GAVCoordinate getP2BridgePluginGAV() {
-    final Properties props = new Properties();
-
-    final InputStream is =
-        P2Runtime.class.getResourceAsStream("/nexus-p2-plugin.properties");
-
-    if (is != null) {
-      try {
-        props.load(is);
-      }
-      catch (final IOException e) {
-        throw new RuntimeException(e.getMessage(), e);
-      }
-    }
-
-    final GAVCoordinate coordinate =
-        new GAVCoordinate("org.sonatype.nexus.plugins", "nexus-p2-bridge-plugin", props.getProperty("version"));
-
-    return coordinate;
-  }
+//  private GAVCoordinate getP2BridgePluginGAV() {
+//    final Properties props = new Properties();
+//
+//    final InputStream is =
+//        P2Runtime.class.getResourceAsStream("/nexus-p2-plugin.properties");
+//
+//    if (is != null) {
+//      try {
+//        props.load(is);
+//      }
+//      catch (final IOException e) {
+//        throw new RuntimeException(e.getMessage(), e);
+//      }
+//    }
+//
+//    final GAVCoordinate coordinate =
+//        new GAVCoordinate("org.sonatype.nexus.plugins", "nexus-p2-bridge-plugin", props.getProperty("version"));
+//
+//    return coordinate;
+//  }
 
 }
